@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منشئ السيرة الذاتية</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"], input[type="email"], textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #cv-output {
+            margin-top: 30px;
+            border: 2px solid #333;
+            padding: 20px;
+            background-color: #fff;
+            display: none;
+        }
+        #cv-output h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        #cv-output h2 {
+            color: #2980b9;
+            margin-top: 20px;
+        }
+        .download-btn {
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>منشئ السيرة الذاتية</h1>
+        <form id="cv-form">
+            <!-- سيتم إضافة الحقول هنا عن طريق JavaScript -->
+        </form>
+        <button type="button" onclick="generateCV()">إنشاء السيرة الذاتية</button>
+        <div id="cv-output"></div>
+        <button type="button" class="download-btn" id="download-img-btn" onclick="downloadImage()">تحميل كصورة</button>
+        <button type="button" class="download-btn" id="download-pdf-btn" onclick="downloadPDF()">تحميل كملف PDF</button>
+    </div>
+
+    <!-- تحميل المكتبات المطلوبة -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        const fields = [
+            { label: "الاسم:", id: "name", type: "text", required: true },
+            { label: "رقم الهاتف:", id: "phone", type: "text", required: true },
+            { label: "البريد الإلكتروني:", id: "email", type: "email", required: true },
+            { label: "العنوان:", id: "address", type: "text", required: true },
+            { label: "الملخص المهني:", id: "summary", type: "textarea", rows: 4, required: true },
+            { label: "الخبرة المهنية:", id: "experience", type: "textarea", rows: 8, required: true },
+            { label: "التعليم:", id: "education", type: "textarea", rows: 6, required: true },
+            { label: "اللغات:", id: "languages", type: "text", required: true },
+            { label: "المهارات:", id: "skills", type: "text", required: true }
+        ];
+
+        const form = document.getElementById('cv-form');
+        fields.forEach(field => {
+            const label = document.createElement('label');
+            label.setAttribute('for', field.id);
+            label.textContent = field.label;
+            form.appendChild(label);
+
+            const input = document.createElement(field.type === "textarea" ? "textarea" : "input");
+            input.setAttribute("id", field.id);
+            input.setAttribute("name", field.id);
+
+            if (field.type === "textarea") {
+                input.setAttribute("rows", field.rows);
+            } else {
+                input.setAttribute("type", field.type);
+            }
+
+            if (field.required) {
+                input.setAttribute("required", "");
+            }
+
+            form.appendChild(input);
+        });
+
+        function generateCV() {
+            const output = document.getElementById('cv-output');
+            output.innerHTML = `
+                <h1>${document.getElementById('name').value}</h1>
+                <div class="contact-info">
+                    <p><strong>رقم الهاتف:</strong> ${document.getElementById('phone').value}</p>
+                    <p><strong>البريد الإلكتروني:</strong> ${document.getElementById('email').value}</p>
+                    <p><strong>العنوان:</strong> ${document.getElementById('address').value}</p>
+                </div>
+                <div class="section">
+                    <h2>الملخص المهني</h2>
+                    <p>${document.getElementById('summary').value}</p>
+                </div>
+                <div class="section">
+                    <h2>الخبرة المهنية</h2>
+                    <p>${document.getElementById('experience').value}</p>
+                </div>
+                <div class="section">
+                    <h2>التعليم</h2>
+                    <p>${document.getElementById('education').value}</p>
+                </div>
+                <div class="section">
+                    <h2>اللغات</h2>
+                    <p>${document.getElementById('languages').value}</p>
+                </div>
+                <div class="section">
+                    <h2>المهارات</h2>
+                    <p>${document.getElementById('skills').value}</p>
+                </div>
+            `;
+
+            output.style.display = "block";
+            document.getElementById('download-img-btn').style.display = "inline-block";
+            document.getElementById('download-pdf-btn').style.display = "inline-block";
+        }
+
+        function downloadImage() {
+            const element = document.getElementById('cv-output');
+            if (element.innerHTML.trim() === '') {
+                alert('الرجاء إنشاء السيرة الذاتية أولاً قبل محاولة التحميل');
+                return;
+            }
+
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                logging: true,
+                letterRendering: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = imgData;
+                link.download = 'MySirahThateya.png';
+                link.click();
+            }).catch(err => {
+                console.error('حدث خطأ أثناء إنشاء الصورة:', err);
+                alert('حدث خطأ أثناء إنشاء الصورة. الرجاء المحاولة مرة أخرى.');
+            });
+        }
+
+        function downloadPDF() {
+            const { jsPDF } = window.jspdf;
+            const element = document.getElementById('cv-output');
+            if (element.innerHTML.trim() === '') {
+                alert('الرجاء إنشاء السيرة الذاتية أولاً قبل محاولة التحميل');
+                return;
+            }
+
+            html2canvas(element, {
+                scale: 2,
+                useCORS: true,
+                logging: true,
+                letterRendering: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pageWidth = pdf.internal.pageSize.getWidth();
+                const pageHeight = pdf.internal.pageSize.getHeight();
+                const widthRatio = pageWidth / canvas.width;
+                const heightRatio = pageHeight / canvas.height;
+                const ratio = widthRatio > heightRatio ? heightRatio : widthRatio;
+
+                const canvasWidth = canvas.width * ratio;
+                const canvasHeight = canvas.height * ratio;
+                const marginX = (pageWidth - canvasWidth) / 2;
+                const marginY = (pageHeight - canvasHeight) / 2;
+
+                pdf.addImage(imgData, 'JPEG', marginX, marginY, canvasWidth, canvasHeight);
+                pdf.save('MySirahThateya.pdf');
+            }).catch(err => {
+                console.error('حدث خطأ أثناء إنشاء ملف PDF:', err);
+                alert('حدث خطأ أثناء إنشاء ملف PDF. الرجاء المحاولة مرة أخرى.');
+            });
+        }
+    </script>
+</body>
+</html>
